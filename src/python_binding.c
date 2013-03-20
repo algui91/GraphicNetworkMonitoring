@@ -4,15 +4,15 @@
  *  Created on: Mar 19, 2013
  *      Author: Alejandro Alcalde <algui91@gmail.com>
  *
- *  <one line to give the program's name and a brief idea of what it does.>
+ *  A simple tool for show network traffic in a graphic way
  *  Copyright (C) 2013 Alejandro Alcalde
  *
- *  gnm is free software: you can redistribute it and/or modify
+ *  GNM is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  gnm is distributed in the hope that it will be useful,
+ *  GNM is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
@@ -28,14 +28,16 @@
 #include <errno.h>
 #include <stdio.h>
 
-
-//#include "gnm.h"
 #include "utils.h"
 
 /* TODO: Check Python version: http://docs.python.org/3/howto/cporting.html */
 
 #define TCP_FILE "/proc/net/tcp"
 
+/**
+ * Function partially copied from ss command
+ * see http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2
+ */
 static struct tcpstat
 *tcp_show_line(char *line, const struct filter *f, int family)
 {
@@ -132,6 +134,10 @@ static struct tcpstat
 	//return 0;
 }
 
+/**
+ * Function partially copied from ss command
+ * see http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2
+ */
 static struct tcpstat*
 generic_record_read(FILE *fp, const struct filter *f, int fam)
 {
