@@ -196,7 +196,7 @@ static PyObject
 }
 
 static PyObject
-*myextension_hello(PyObject *self, PyObject *args) {
+*gnm_hello(PyObject *self, PyObject *args) {
 	//struct module_state *st = GETSTATE(self);
 
 	struct tcpstat *stats;
@@ -236,59 +236,59 @@ static PyObject
 	//Py_DECREF(result);
 }
 
-static PyMethodDef myextension_methods[] = {
+static PyMethodDef gnm_methods[] = {
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
-    {"helloC", (PyCFunction)myextension_hello, METH_NOARGS, NULL},
+    {"helloC", (PyCFunction)gnm_hello, METH_NOARGS, NULL},
     {NULL, NULL}
 };
 
 #if PY_MAJOR_VERSION >= 3
 
-static int myextension_traverse(PyObject *m, visitproc visit, void *arg) {
+static int gnm_traverse(PyObject *m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
     return 0;
 }
 
-static int myextension_clear(PyObject *m) {
+static int gnm_clear(PyObject *m) {
     Py_CLEAR(GETSTATE(m)->error);
     return 0;
 }
 
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "myextension",			/* m_name */
+        "gnm",				/* m_name */
         NULL,				/* m_doc */
         sizeof(struct module_state),	/* m_size */
-        myextension_methods,		/* m_methods */
+        gnm_methods,			/* m_methods */
         NULL,				/* m_reload */
-        myextension_traverse,		/* m_traverse */
-        myextension_clear,		/* m_clear */
+        gnm_traverse,			/* m_traverse */
+        gnm_clear,			/* m_clear */
         NULL				/* m_free */
 };
 
 #define INITERROR return NULL
 
 PyObject *
-PyInit_myextension(void)
+PyInit_gnm(void)
 
 #else
 #define INITERROR return
 
 void
-initmyextension(void)
+initgnm(void)
 #endif
 {
 #if PY_MAJOR_VERSION >= 3
     PyObject *module = PyModule_Create(&moduledef);
 #else
-    PyObject *module = Py_InitModule("myextension", myextension_methods);
+    PyObject *module = Py_InitModule("gnm", gnm_methods);
 #endif
 
     if (module == NULL)
         INITERROR;
     struct module_state *st = GETSTATE(module);
 
-    st->error = PyErr_NewException("myextension.Error", NULL, NULL);
+    st->error = PyErr_NewException("gnm.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
         INITERROR;

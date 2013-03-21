@@ -32,7 +32,7 @@ gnm: $(OBJS) $(USER_OBJS)
 pyModule:
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc python_binding.c -o "myextension.so" -fPIC -shared -I/usr/include/python3.2 -I../include
+	gcc gnmModule.c -o "gnm.so" -fPIC -shared -I/usr/include/python3.2 -I../include
 	@echo 'Finished building target: $@'
 	@echo ' '
 
