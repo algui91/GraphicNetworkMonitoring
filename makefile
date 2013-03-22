@@ -1,12 +1,12 @@
--include ../makefile.init
+#-include ../makefile.init
 
 RM := rm -rf
 
 # All of the sources participating in the build are defined here
--include sources.mk
--include src/subdir.mk
--include subdir.mk
--include objects.mk
+#-include sources.mk
+#-include src/subdir.mk
+#-include subdir.mk
+#-include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C_DEPS)),)
@@ -14,9 +14,12 @@ ifneq ($(strip $(C_DEPS)),)
 endif
 endif
 
--include ../makefile.defs
+#-include ../makefile.defs
 
 # Add inputs and outputs from these tool invocations to the build variables 
+
+SRC = src/
+INC = include/
 
 # All Target
 all: gnm pyModule
@@ -32,7 +35,7 @@ gnm: $(OBJS) $(USER_OBJS)
 pyModule:
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc gnmModule.c -o "gnm.so" -fPIC -shared -I/usr/include/python3.2 -I../include
+	gcc $(SRC)/gnmModule.c -o "gnm.so" -fPIC -shared -I/usr/include/python3.2 -I./$(INC)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

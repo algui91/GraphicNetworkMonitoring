@@ -21,12 +21,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <Python.h>
-#include <stdlib.h>
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
 
 #include "utils.h"
 
@@ -108,6 +106,9 @@ static struct tcpstat
 			s->ssthresh = -1;
 			s->ato = s->qack = 0;
 		}
+	} else {
+		/* No memory available */
+		return PyErr_NoMemory();
 	}
 	/* if (netid_width) */
 		printf("%-*s ", 2, "tcp");
@@ -129,9 +130,9 @@ static struct tcpstat
 
 	printf("\n");
 
-	return s;
+	free(s);
 
-	//return 0;
+	return s;
 }
 
 /**
@@ -173,7 +174,8 @@ generic_record_read(FILE *fp, const struct filter *f, int fam)
 
 	/* return ferror(fp) ? -1 : 0; */
 	if (ferror(fp))
-		fatal("in generic_record_read(), while skiping header");
+		//fatal("in generic_record_read(), while skiping header");
+		return NULL;
 }
 
 
@@ -197,7 +199,7 @@ static PyObject
 
 static PyObject
 *gnm_hello(PyObject *self, PyObject *args) {
-	//struct module_state *st = GETSTATE(self);
+	struct module_state *st = GETSTATE(self);
 
 	struct tcpstat *stats;
 	FILE* fp;
@@ -238,8 +240,8 @@ static PyObject
 
 static PyMethodDef gnm_methods[] = {
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
-    {"helloC", (PyCFunction)gnm_hello, METH_NOARGS, NULL},
-    {NULL, NULL}
+    {"helloC", (PyCFunction)gnm_hello, METH_NOARGS, "Say Hello to the C Module!"},
+    {NULL, NULL, 0, NULL}	/* Sentinel */
 };
 
 #if PY_MAJOR_VERSION >= 3
@@ -257,7 +259,7 @@ static int gnm_clear(PyObject *m) {
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
         "gnm",				/* m_name */
-        NULL,				/* m_doc */
+        "Module doc, TODO",		/* m_doc */
         sizeof(struct module_state),	/* m_size */
         gnm_methods,			/* m_methods */
         NULL,				/* m_reload */
@@ -268,7 +270,7 @@ static struct PyModuleDef moduledef = {
 
 #define INITERROR return NULL
 
-PyObject *
+PyMODINIT_FUNC
 PyInit_gnm(void)
 
 #else
