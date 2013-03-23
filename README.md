@@ -7,8 +7,7 @@ Install
 -------
 
 ```bash
-    make pyModule
-    ln -s /absulute/path/to/gnm.so /usr/lib/python3.2/
+    sudo python3.2 setup.py install
 ```
 
 Usage
