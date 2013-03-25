@@ -2,7 +2,8 @@
  * python_binding.c
  *
  *  Created on: Mar 19, 2013
- *      Author: Alejandro Alcalde <algui91@gmail.com>
+ *  Last commit: $Date$
+ *  Author: Alejandro Alcalde <algui91@gmail.com>
  *
  *  A simple tool for show network traffic in a graphic way
  *  Copyright (C) 2013 Alejandro Alcalde
