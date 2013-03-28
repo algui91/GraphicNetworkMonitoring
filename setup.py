@@ -6,7 +6,7 @@ SRC = 'src/'
 
 module1 = Extension('gnm',
                     include_dirs = ['./include'],
-#                    extra_link_args = ['-shared'],#, '-I/usr/include/python3.2'],
+#                    extra_link_args = ['-O0'],
                     sources = [SRC + 'gnmModule.c'])
 
 setup (name = 'GraphicNetworkMonitoring',

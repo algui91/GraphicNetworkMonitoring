@@ -40,23 +40,23 @@
 static struct tcpstat
 *tcp_show_line(char *line, const struct filter *f, int family)
 {
-	struct tcpstat *s;
+	struct tcpstat *s = 0;
 	char *loc, *rem, *data;
 	char opt[256];
 	int n;
 	char *p;
 
 	if ((p = strchr(line, ':')) == NULL)
-		return -1;
+		return s; /* return null pointer */
 	loc = p+2; //apunta al primer valor de local_addresss
 
 	if ((p = strchr(loc, ':')) == NULL)
-		return -1;
+		return s;
 	p[5] = 0; //Me quedo con el puerto
 	rem = p+6; //remote address
 
 	if ((p = strchr(rem, ':')) == NULL)
-		return -1;
+		return s;
 	p[5] = 0; //Puerto remote addres
 	data = p+6;
 
@@ -109,15 +109,15 @@ static struct tcpstat
 		}
 	} else {
 		/* No memory available */
-		return PyErr_NoMemory();
+		return  s; /* PyErr_NoMemory(); ?? */
 	}
 	/* if (netid_width) */
-		printf("%-*s ", 2, "tcp");
+	//	printf("%-*s ", 2, "tcp");
 	/* if (state_width) */
 
-	printf("%-*s ", 10, sstate_name[s->state]);
+	//printf("%-*s ", 10, sstate_name[s->state]);
 
-	printf("%-6d %-6d ", s->rq, s->wq);
+	//printf("%-6d %-6d ", s->rq, s->wq);
 
 	//formatted_print(&s->local, s->lport);
 	//formatted_print(&s->remote, s->rport);
@@ -126,10 +126,10 @@ static struct tcpstat
 	{
 		char ubuf[4096];
 		//if (find_users(s->ino, ubuf, sizeof(ubuf)) > 0)
-			printf(" users:(%s)", ubuf);
+	//		printf(" users:(%s)", ubuf);
 	}
 
-	printf("\n");
+	//printf("\n");
 
 	free(s);
 
@@ -205,9 +205,9 @@ static PyObject
 	struct tcpstat *stats;
 	FILE* fp;
 	size_t nread;
-	const char buf[1024];
-	const char *ap = buf;
-	const struct filter current_filter;
+	char buf[1024];
+	char *ap = buf;
+	struct filter current_filter;
 
 	fp = fopen(TCP_FILE, "r");
 
@@ -216,10 +216,16 @@ static PyObject
 
 	memset(&current_filter, 0, sizeof(current_filter));
 
-	//(struct tcpstat*) ec_malloc(256 * sizeof(struct tcpstat));
+	stats = (struct tcpstat*) ec_malloc(256 * sizeof(struct tcpstat));
 	stats = generic_record_read(fp, &current_filter, AF_INET);
 
 	fclose(fp);
+
+        int i = 0;
+        for (i; i<5; i++){
+                printf("%s", stats[i].local);
+                printf("\n");
+        }
 
 	PyObject *result = NULL;
 	ap = inet_ntop(AF_INET, stats[0].local.data, buf, INET_ADDRSTRLEN);
