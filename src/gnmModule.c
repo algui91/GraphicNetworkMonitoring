@@ -131,8 +131,6 @@ static struct tcpstat
 
 	//printf("\n");
 
-	free(s);
-
 	return s;
 }
 
