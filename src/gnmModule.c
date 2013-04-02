@@ -38,7 +38,7 @@
  * see http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2
  */
 static struct tcpstat
-*tcp_show_line(char *line, const struct filter *f, int family)
+*tcp_show_line(char *line, int family)
 {
 	struct tcpstat *s = 0;
 	char *loc, *rem, *data;
@@ -139,14 +139,14 @@ static struct tcpstat
  * see http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2
  */
 static struct tcpstat*
-generic_record_read(FILE *fp, const struct filter *f, int fam)
+generic_record_read(FILE *fp, int *index, int fam)
 {
 	char line[256];
-	struct tcpstat *tcp_pkt;
-	int index = 0;
+	struct tcpstat *tcp_pkt, *value;
+	*index = 0;
 
 	tcp_pkt = (struct tcpstat*) ec_malloc(256*sizeof(struct tcpstat));
-
+	memset(tcp_pkt, 0, sizeof(struct tcpstat) *256 );
 	/* Skip Header */
 	if (fgets(line, sizeof(line), fp) == NULL)
 		goto outerr;
@@ -162,11 +162,12 @@ generic_record_read(FILE *fp, const struct filter *f, int fam)
 			return tcp_pkt;
 		}
 		line[n - 1] = 0;
-		struct tcpstat *value;
-		value = tcp_show_line(line, f, fam); //TODO: check for errors
-		tcp_pkt[index++] = *value;
+		value = tcp_show_line(line, fam); //TODO: check for errors
+		tcp_pkt[(*index)++] = *value;
 
 	}
+	free(value);
+
 	return tcp_pkt;
 
 	outerr:
@@ -206,6 +207,7 @@ static PyObject
 	char buf[1024];
 	char *ap = buf;
 	struct filter current_filter;
+	int stats_length;
 
 	fp = fopen(TCP_FILE, "r");
 
@@ -215,19 +217,24 @@ static PyObject
 	memset(&current_filter, 0, sizeof(current_filter));
 
 	stats = (struct tcpstat*) ec_malloc(256 * sizeof(struct tcpstat));
-	stats = generic_record_read(fp, &current_filter, AF_INET);
+	memset(stats, 0, sizeof(struct tcpstat) * 256);
+
+	stats = generic_record_read(fp, &stats_length, AF_INET);
 
 	fclose(fp);
 
         int i = 0;
         for (i; i<5; i++){
-                printf("%s", stats[i].local);
+                printf("%d", stats[i].lport);
                 printf("\n");
         }
 
 	PyObject *result = NULL;
+
 	ap = inet_ntop(AF_INET, stats[0].local.data, buf, INET_ADDRSTRLEN);
 	result = Py_BuildValue("{s:s}", "local", ap);
+
+	printf("El valor del contador es %d", stats_length);
 
 	return result; //raise an exception
 
