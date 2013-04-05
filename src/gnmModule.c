@@ -204,8 +204,6 @@ static PyObject
 	struct tcpstat *stats;
 	FILE* fp;
 	size_t nread;
-	char buf[1024];
-	char *ap = buf;
 	struct filter current_filter;
 	int stats_length;
 
@@ -223,9 +221,6 @@ static PyObject
 
 	fclose(fp);
 
-	ap = inet_ntop(AF_INET, stats[0].local.data, buf, INET_ADDRSTRLEN);
-	//dict = Py_BuildValue("{s:s}", "local", ap);
-
 	PyObject *dict = NULL;
 	PyListObject *list;
 
@@ -233,24 +228,30 @@ static PyObject
 
 	int i = 0;
 	for (i; i < stats_length; i++) {
-		dict = Py_BuildValue("{s:i}", "LPort", stats[i].lport);
+                char bufl[1024];
+                char *apl = bufl;
+                char bufr[1024];
+                char *apr = bufr;
+
+                apl = inet_ntop(AF_INET, stats[i].local.data, bufl, INET_ADDRSTRLEN);
+		apr = inet_ntop(AF_INET, stats[i].remote.data, bufr, INET_ADDRSTRLEN);
+
+                dict = Py_BuildValue(
+                                "{"
+                                "       s:s,"
+                                "       s:s"
+                                "}",
+                                "Dir Local.",
+                                apl,
+                                "Dir.Remota.",
+                                apr
+                       );
 		PyList_Append(list, dict);
 	}
 
-	//printf("El valor del contador es %d", stats_length);
+        Py_DECREF(dict);
 
 	return (PyObject *) list; //raise an exception
-
-	/*
-	PyObject *dict;
-	...
-	dict = Py_BuildValue("{s:i}", "name", val);
-	result = PyObject_Call(my_callback, NULL, dict);
-	Py_DECREF(dict);
-	if (result == NULL)
-	    return NULL; /* Pass error back */
-	/* Here maybe use the result */
-	//Py_DECREF(result);
 }
 
 static PyMethodDef gnm_methods[] = {
