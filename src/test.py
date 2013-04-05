@@ -2,4 +2,8 @@
 
 import gnm
 
-print (gnm.helloC())
+def pretty(d, indent=0):
+        for i in range(len(d)):
+                print(d[i])
+
+pretty(gnm.helloC())

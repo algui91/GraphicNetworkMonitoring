@@ -223,20 +223,23 @@ static PyObject
 
 	fclose(fp);
 
-        int i = 0;
-        for (i; i<5; i++){
-                printf("%d", stats[i].lport);
-                printf("\n");
-        }
-
-	PyObject *result = NULL;
-
 	ap = inet_ntop(AF_INET, stats[0].local.data, buf, INET_ADDRSTRLEN);
-	result = Py_BuildValue("{s:s}", "local", ap);
+	//dict = Py_BuildValue("{s:s}", "local", ap);
 
-	printf("El valor del contador es %d", stats_length);
+	PyObject *dict = NULL;
+	PyListObject *list;
 
-	return result; //raise an exception
+	list = (PyListObject *) Py_BuildValue("[]");
+
+	int i = 0;
+	for (i; i < stats_length; i++) {
+		dict = Py_BuildValue("{s:i}", "LPort", stats[i].lport);
+		PyList_Append(list, dict);
+	}
+
+	//printf("El valor del contador es %d", stats_length);
+
+	return (PyObject *) list; //raise an exception
 
 	/*
 	PyObject *dict;
