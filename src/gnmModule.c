@@ -26,7 +26,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-
+#include <stdlib.h>
 #include "utils.h"
 
 /* TODO: Check Python version: http://docs.python.org/3/howto/cporting.html */
@@ -221,10 +221,10 @@ static PyObject
 
 	fclose(fp);
 
-	PyObject *dict = NULL;
+	PyObject *dict = PyDict_New();
+	PyObject *dict2 = PyDict_New();
+	PyObject *newItem = NULL;
 	PyListObject *list;
-
-	list = (PyListObject *) Py_BuildValue("[]");
 
 	int i = 0;
 	for (i; i < stats_length; i++) {
@@ -236,22 +236,20 @@ static PyObject
                 apl = inet_ntop(AF_INET, stats[i].local.data, bufl, INET_ADDRSTRLEN);
 		apr = inet_ntop(AF_INET, stats[i].remote.data, bufr, INET_ADDRSTRLEN);
 
-                dict = Py_BuildValue(
-                                "{"
-                                "       s:s,"
-                                "       s:s"
-                                "}",
-                                "Dir Local.",
-                                apl,
-                                "Dir.Remota.",
-                                apr
-                       );
-		PyList_Append(list, dict);
+                newItem = Py_BuildValue("s",apl);
+                PyObject *ip = Py_BuildValue("i",i);
+
+                PyDict_SetItem(dict2, ip, newItem);
 	}
+	dict = Py_BuildValue("{"
+			"       s:O,"
+			"       s:O"
+			"}", "Dir Local.", dict2,
+	                "Dir.Remota.", newItem
+	                );
+        //Py_DECREF(dict);
 
-        Py_DECREF(dict);
-
-	return (PyObject *) list; //raise an exception
+	return (PyObject *) dict; //raise an exception
 }
 
 static PyMethodDef gnm_methods[] = {
