@@ -222,9 +222,10 @@ static PyObject
 	fclose(fp);
 
 	PyObject *dict = PyDict_New();
-	PyObject *dict2 = PyDict_New();
-	PyObject *newItem = NULL;
-	PyListObject *list;
+	PyObject *dictLocAddr = PyDict_New();
+	PyObject *dictRemAddr = PyDict_New();
+	PyObject *locAddr = NULL;
+	PyObject *remAddr = NULL;
 
 	int i = 0;
 	for (i; i < stats_length; i++) {
@@ -236,16 +237,20 @@ static PyObject
                 apl = inet_ntop(AF_INET, stats[i].local.data, bufl, INET_ADDRSTRLEN);
 		apr = inet_ntop(AF_INET, stats[i].remote.data, bufr, INET_ADDRSTRLEN);
 
-                newItem = Py_BuildValue("s",apl);
-                PyObject *ip = Py_BuildValue("i",i);
+                locAddr = Py_BuildValue("s", strcmp(apl, "0.0.0.0") ? apl : "*");
+                remAddr = Py_BuildValue("s", strcmp(apr, "0.0.0.0") ? apr : "*");
+                PyObject *index = Py_BuildValue("i",i);
 
-                PyDict_SetItem(dict2, ip, newItem);
+                PyDict_SetItem(dictLocAddr, index, locAddr);
+                PyDict_SetItem(dictRemAddr, index, remAddr);
 	}
-	dict = Py_BuildValue("{"
-			"       s:O,"
+	dict = Py_BuildValue(
+			"{"
+			"	s:O,"
 			"       s:O"
-			"}", "Dir Local.", dict2,
-	                "Dir.Remota.", newItem
+			"}",
+			"Dir Local.", dictLocAddr,
+	                "Dir Remota.", dictRemAddr
 	                );
         //Py_DECREF(dict);
 
